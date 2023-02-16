@@ -13,7 +13,7 @@ variable "public_subnet_name" {
 variable "subnet_azs" {
   description = "Availability Zones for the subnets"
   type        = list(any)
-  default     = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  default     = ["eu-west-1a"]
 }
 
 variable "vpc_cidr" {
@@ -25,5 +25,5 @@ variable "vpc_cidr" {
 variable "public_subnet_cidrs" {
   description = "CIDRs for the Public Subnets"
   type        = list(any)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  default     = ["10.0.1.0/24"]
 }

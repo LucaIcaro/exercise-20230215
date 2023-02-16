@@ -1,0 +1,19 @@
+---
+required_packages:
+  - python3-devel
+  - nginx
+
+app_user:
+  name: my_app_user
+  uid: 1503
+  private_key_file: "/home/my_app_user/.ssh/id_rsa"
+
+app_group:
+  name: webapps
+  gid: 570
+
+git_repo:
+  repo: git@bitbucket.org:my-org/my_app.git
+  destination_dir: /tmp/git
+
+app_folder: /opt/my_app

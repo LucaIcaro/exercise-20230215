@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.3"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -6,16 +8,16 @@ terraform {
     }
   }
 
-  #   backend "s3" {
-  #     bucket = "my-tf-state"
-  #     key    = "network/terraform.tfstate"
-  #     region = "eu-west-1"
+  backend "s3" {
+    bucket = "my-tf-state"
+    key    = "network/terraform.tfstate"
+    region = "eu-west-1"
 
-  #     dynamodb_table = "my-tf-lock"
-  #     encrypt        = true
-  #   }
+    dynamodb_table = "my-tf-lock"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
-
+  region = var.aws_region
 }

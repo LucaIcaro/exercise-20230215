@@ -1,0 +1,85 @@
+---
+- name: Configure instance
+  hosts: "tag_Name_my_instance_dev"
+  tags:
+    - app
+  user: ec2-user
+  become: true
+  gather_facts: true
+  vars_files:
+    - "vars/vars.yml"
+    - "vars/vault.yml"
+
+  pre_tasks:
+
+    - name: refresh inventory
+      meta: refresh_inventory
+
+    - name: gather facts from instance
+      setup:
+
+    - name: Install required packages for the app
+      yum:
+        name: "{{ required_packages }}"
+        state: present
+
+    - name: Configure Group
+      group:
+        name: "{{ app_group.name }}"
+        gid: "{{ app_group.gid }}"
+        state: present
+
+    - name: Configure user
+      user:
+        name: "{{ app_user.name }}"
+        uid: "{{ app_user.uid }}"
+        group: "{{ app_group.name }}"
+        create_home: true
+        state: present
+
+    - name: create ssh folder for user
+      file:
+        path: "/home{{ app_user.name  }}/.ssh"
+        mode: '0751'
+        state: directory
+
+    - name: create key on local file system
+      copy:
+        content: "{{ vault_private_key }}"
+        dest: "{{ app_user.private_key_file }}"
+        mode: '0400'
+
+  tasks:
+
+    - name: Clone git repository
+      git:
+        clone: true
+        dest: "{{ git_repo.destination_dir }}"
+        key_file: "{{ app_user.private_key_file }}"
+        repo: "{{ git_repo.repo }}"
+
+    - name: create application dir
+      file:
+        path: "{{ app_folder }}"
+        mode: '0755'
+        state: directory
+
+    - name: Copy files to destination dir
+      copy:
+        remote_src: true
+        src: "{{ git_repo.destination_dir }}/"
+        dest: "{{ app_folder }}/"
+        mode: "0644"
+
+    - name: Run install for the app
+      become_user: "{{ app_user.name }}"
+      shell: make install
+      args:
+        chdir: "{{ app_folder }}"
+      register: install_output
+
+    - name: Restart Nginx
+      systemd:
+        name: Nginx
+        state: restarted
+      when: install_output.changed
